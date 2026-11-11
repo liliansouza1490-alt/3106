@@ -53,8 +53,6 @@ struct ContentView: View {
         }
         .tint(AppTheme.accent)
         .imageScale(.small)
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
         .background(AppTheme.pageBackground.ignoresSafeArea())
         .onChange(of: patchDraftCoordinator.request?.id) { requestID in
             if requestID != nil { tabNavigation.select(AppSection.installed.rawValue) }
@@ -70,7 +68,8 @@ struct ContentView: View {
         }
         .onAppear {
             if tabBarSelectionRaw == TabBarSelection.legacyDefaultRaw
-                || tabBarSelectionRaw == TabBarSelection.previousDefaultRaw {
+                || tabBarSelectionRaw == TabBarSelection.previousDefaultRaw
+                || tabBarSelectionRaw == TabBarSelection.lastDefaultRaw {
                 tabBarSelectionRaw = TabBarSelection.defaultRaw
             }
             tabNavigation.reconcileSelection(with: featureVisibility)
@@ -260,17 +259,16 @@ private struct LiquidGlassTabBar: View {
                     .background {
                         if isSelected {
                             RoundedRectangle(cornerRadius: 17, style: .continuous)
-                                .fill(.ultraThinMaterial)
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 17, style: .continuous)
-                                        .fill(AppTheme.accent.opacity(0.10))
-                                }
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 17, style: .continuous)
-                                        .strokeBorder(.white.opacity(0.56), lineWidth: 0.8)
-                                }
+                                .fill(AppTheme.accent.opacity(0.13))
                         }
                     }
+                    .modifier(
+                        AppLiquidGlassSurface(
+                            shape: RoundedRectangle(cornerRadius: 17, style: .continuous),
+                            tint: AppTheme.accent,
+                            isActive: isSelected
+                        )
+                    )
                     .contentShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -278,15 +276,8 @@ private struct LiquidGlassTabBar: View {
             }
         }
         .padding(5)
-        .background(.ultraThinMaterial, in: Capsule())
-        .overlay {
-            Capsule().strokeBorder(.white.opacity(0.62), lineWidth: 1)
-        }
-        .overlay {
-            Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.6)
-                .padding(1)
-        }
-        .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 8)
+        .modifier(AppLiquidGlassSurface(shape: Capsule(), tint: AppTheme.accent))
+        .shadow(color: .black.opacity(0.24), radius: 23, x: 0, y: 10)
         .accessibilityElement(children: .contain)
     }
 }

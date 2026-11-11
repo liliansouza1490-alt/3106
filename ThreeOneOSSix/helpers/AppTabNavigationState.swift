@@ -15,7 +15,7 @@ enum AppSection: Int, CaseIterable, Identifiable {
 
 extension AppSection {
     static let navigationSections: [AppSection] = [
-        .home, .sources, .installed, .search, .wallpapers
+        .home, .installed
     ]
 
     var isNavigationSection: Bool {
@@ -51,11 +51,12 @@ extension AppSection {
 
 enum TabBarSelection {
     static let storageKey = "tabbar.selection"
-    static let maxSections = 5
-    /// Home, Sources, Installed, Search, and Wallpapers.
-    static let defaultRaw = "0,2,3,5,7"
+    static let maxSections = 2
+    /// Home and Installed.
+    static let defaultRaw = "0,3"
     static let legacyDefaultRaw = "0,1,2,3,4"
     static let previousDefaultRaw = "0,1,3,4,6"
+    static let lastDefaultRaw = "0,2,3,5,7"
 
     static func sections(from raw: String) -> [AppSection] {
         let selected = Set(raw.split(separator: ",").compactMap { Int($0) })

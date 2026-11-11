@@ -38,6 +38,65 @@ struct AppCardBorder: View {
     }
 }
 
+struct AppLiquidGlassSurface<S: Shape>: ViewModifier {
+    let shape: S
+    var tint: Color = .clear
+    var isActive = true
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isActive {
+            if #available(iOS 26.0, *) {
+                content
+                    .glassEffect(.regular, in: shape)
+                    .overlay {
+                        shape.stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.78), .white.opacity(0.16)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                        .allowsHitTesting(false)
+                    }
+            } else {
+                content
+                    .background {
+                        shape.fill(.ultraThinMaterial)
+                            .overlay {
+                                shape.fill(
+                                    LinearGradient(
+                                        colors: [tint.opacity(0.22), tint.opacity(0.06)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                            }
+                    }
+                    .overlay {
+                        shape.stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.80), .white.opacity(0.20)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.15
+                        )
+                        .allowsHitTesting(false)
+                    }
+                    .overlay {
+                        shape.stroke(Color.black.opacity(0.20), lineWidth: 0.6)
+                            .padding(1)
+                            .allowsHitTesting(false)
+                    }
+            }
+        } else {
+            content
+        }
+    }
+}
+
 struct AppRowIcon: View {
     let systemName: String
     var tint: Color = AppTheme.accent
@@ -47,27 +106,19 @@ struct AppRowIcon: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [tint.opacity(0.20), tint.opacity(0.07)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .strokeBorder(.white.opacity(0.62), lineWidth: 0.8)
-                }
+                .fill(tint.opacity(0.12))
             Image(systemName: systemName)
                 .font(.system(size: symbolSize, weight: .semibold))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(tint)
         }
         .frame(width: frameSize, height: frameSize)
+        .modifier(
+            AppLiquidGlassSurface(
+                shape: RoundedRectangle(cornerRadius: 7, style: .continuous),
+                tint: tint
+            )
+        )
         .shadow(color: tint.opacity(0.10), radius: 5, y: 2)
         .accessibilityHidden(true)
     }

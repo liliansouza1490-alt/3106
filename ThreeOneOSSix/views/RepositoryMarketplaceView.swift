@@ -1012,11 +1012,9 @@ struct AppUtilityToolbar: ToolbarContent {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(AppTheme.accent)
                     .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay {
-                        Circle().strokeBorder(.white.opacity(0.62), lineWidth: 0.9)
-                    }
-                    .shadow(color: .black.opacity(0.08), radius: 7, y: 3)
+                    .background { Circle().fill(AppTheme.accent.opacity(0.12)) }
+                    .modifier(AppLiquidGlassSurface(shape: Circle(), tint: AppTheme.accent))
+                    .shadow(color: .black.opacity(0.16), radius: 10, y: 4)
             }
             .accessibilityLabel(language.text("accessibility.open_settings"))
         }
