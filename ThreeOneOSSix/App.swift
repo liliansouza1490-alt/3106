@@ -8,8 +8,10 @@ struct ThreeOneOSSixApp: App {
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
     @StateObject private var patchStore = PatchProjectStore()
     @StateObject private var repositoryStore = PackageRepositoryStore()
+    @StateObject private var externalAuthSession = ExternalSystemAuthSession()
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
     @State private var showCalculatorEntry = true
+    @State private var hasInitializedAuthorizedApp = false
     @State private var showAttribution = false
     @State private var updateOffer: AppUpdateChecker.Offer?
     @Environment(\.scenePhase) private var scenePhase
@@ -34,34 +36,50 @@ struct ThreeOneOSSixApp: App {
         }
     }
 
+    private func initializeAuthorizedAppIfNeeded() {
+        guard !showCalculatorEntry,
+              externalAuthSession.isAuthenticated,
+              !hasInitializedAuthorizedApp else { return }
+        hasInitializedAuthorizedApp = true
+        appState.detectSupport()
+        checkForUpdate()
+    }
+
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ContentView()
-                    .environmentObject(appState)
-                    .environmentObject(patchDraftCoordinator)
-                    .environmentObject(fileOperationCoordinator)
-                    .environmentObject(patchStore)
-                    .environmentObject(repositoryStore)
-                    .environment(\.appLanguage, language)
-                    .environment(\.locale, language.locale)
-                    .opacity(showCalculatorEntry ? 0 : 1)
-                    .allowsHitTesting(!showCalculatorEntry)
-
                 if showCalculatorEntry {
                     CalculadoraIPhoneView {
                         OnboardingStore.markCompleted()
+                        externalAuthSession.passCalculatorGate()
                         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.24)) {
                             showCalculatorEntry = false
                         }
                     }
                     .transition(.opacity)
                     .zIndex(2)
+                } else if externalAuthSession.isAuthenticated {
+                    ContentView()
+                        .environmentObject(appState)
+                        .environmentObject(patchDraftCoordinator)
+                        .environmentObject(fileOperationCoordinator)
+                        .environmentObject(patchStore)
+                        .environmentObject(repositoryStore)
+                        .environment(\.appLanguage, language)
+                        .environment(\.locale, language.locale)
+                        .transition(.opacity)
+                } else {
+                    ExternalSystemLoginView(session: externalAuthSession)
+                        .environment(\.appLanguage, language)
+                        .environment(\.locale, language.locale)
+                        .transition(.opacity)
                 }
             }
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: showCalculatorEntry)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: externalAuthSession.isAuthenticated)
             .displayIdentityAttribution(
                 isPresented: $showAttribution,
-                enabled: !showCalculatorEntry
+                enabled: !showCalculatorEntry && externalAuthSession.isAuthenticated
             )
             .sheet(isPresented: $showAttribution) {
                 DisplayAttributionSheet()
@@ -79,19 +97,22 @@ struct ThreeOneOSSixApp: App {
                 )
             }
             .onAppear {
-                if !showCalculatorEntry {
-                    appState.detectSupport()
-                    checkForUpdate()
-                }
+                initializeAuthorizedAppIfNeeded()
             }
             .onChange(of: scenePhase) { phase in
                 guard phase == .active, !showCalculatorEntry else { return }
-                appState.detectSupport()
+                Task { await externalAuthSession.refreshStoredSession() }
+                if externalAuthSession.isAuthenticated { appState.detectSupport() }
             }
             .onChange(of: showCalculatorEntry) { isShowing in
-                guard !isShowing else { return }
-                appState.detectSupport()
-                checkForUpdate()
+                if !isShowing { initializeAuthorizedAppIfNeeded() }
+            }
+            .onChange(of: externalAuthSession.isAuthenticated) { isAuthenticated in
+                if isAuthenticated {
+                    initializeAuthorizedAppIfNeeded()
+                } else {
+                    hasInitializedAuthorizedApp = false
+                }
             }
             .onOpenURL { url in
                 patchDraftCoordinator.presentImport(url)
