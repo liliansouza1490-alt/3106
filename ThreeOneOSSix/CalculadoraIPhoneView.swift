@@ -95,13 +95,13 @@ struct CalculadoraIPhoneView: View {
 
     private var topBar: some View {
         HStack {
-            iconButton("clock", accessibility: "Histórico") {
+            glassIcon("clock", accessibility: "Histórico") {
                 showHistory = true
             }
 
             Spacer()
 
-            iconButton("calculator", accessibility: "Modos da calculadora") {
+            glassIcon("calculator", accessibility: "Modos da calculadora") {
                 withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
                     showModeMenu.toggle()
                 }
@@ -115,7 +115,7 @@ struct CalculadoraIPhoneView: View {
         .frame(height: 44)
     }
 
-    private func iconButton(_ symbol: String, accessibility: String, action: @escaping () -> Void) -> some View {
+    private func glassIcon(_ symbol: String, accessibility: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Group {
                 if symbol == "calculator" {
@@ -129,6 +129,9 @@ struct CalculadoraIPhoneView: View {
                 }
             }
                 .frame(width: 44, height: 44)
+                .background(.ultraThinMaterial, in: Circle())
+                .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 0.7))
+                .shadow(color: .black.opacity(0.22), radius: 8, y: 3)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(accessibility)
@@ -189,10 +192,9 @@ struct CalculadoraIPhoneView: View {
         }
         .padding(.vertical, 8)
         .frame(width: 238)
-        .background(
-            Color(uiColor: .secondarySystemBackground),
-            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-        )
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 25, style: .continuous).stroke(Color.white.opacity(0.12), lineWidth: 0.8))
+        .shadow(color: .black.opacity(0.45), radius: 24, y: 12)
         .environment(\.colorScheme, .dark)
     }
 
