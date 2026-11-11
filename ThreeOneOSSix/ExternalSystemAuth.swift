@@ -100,7 +100,7 @@ final class ExternalSystemAuthSession: ObservableObject {
     }
 
     private func validate(_ key: String, saveOnSuccess: Bool) async {
-        guard !isChecking else { return }
+        guard didPassCalculatorGate, !isChecking else { return }
         isChecking = true
         defer { isChecking = false }
 
