@@ -498,7 +498,7 @@
 "tab.sources" = "Sources";
 "tab.installed" = "Installed";
 "installed.search" = "Search patches or wallpapers";
-"installed.empty_title" = "Nothing Installed";
+"installed.empty_title" = "Nothing installed";
 "installed.empty_message" = "Import a .3106 patch or .tendies wallpaper package to begin.";
 "installed.loading" = "Loading installed items…";
 "installed.kind.patch" = "Patch · .3106";
