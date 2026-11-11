@@ -537,7 +537,7 @@ extension View {
     }
 }
 
-private struct PatchProjectDetailView: View {
+struct PatchProjectDetailView: View {
     @Environment(\.appLanguage) private var language
     @ObservedObject var store: PatchProjectStore
     let projectID: UUID
@@ -551,6 +551,11 @@ private struct PatchProjectDetailView: View {
     @State private var isWorking = false
     @State private var actionAlert: PatchStoreAlert?
     @State private var shareRequest: PatchShareRequest?
+
+    init(store: PatchProjectStore, projectID: UUID) {
+        self.store = store
+        self.projectID = projectID
+    }
 
     private var item: PatchLibraryItem? {
         store.items.first(where: { $0.id == projectID })

@@ -30,11 +30,24 @@ private enum ExternalPanelCategory: String, CaseIterable, Identifiable {
     }
 }
 
+private struct SkinCharacter: Identifiable {
+    let id: String
+    let name: String
+    let imageName: String
+
+    static let all = [
+        SkinCharacter(id: "alok", name: "Alok", imageName: "AlokCharacter")
+    ]
+}
+
 struct ExternalIOSPanelView: View {
     @ObservedObject var authSession: ExternalSystemAuthSession
     @Environment(\.externalGameSelection) private var selectedGame
+    @EnvironmentObject private var patchStore: PatchProjectStore
     @State private var selectedCategory: ExternalPanelCategory = .external
     @State private var isDrawerOpen = false
+    @State private var selectedSkinCharacterID: String?
+    @State private var selectedSkinPatch: PatchLibraryItem?
 
     private let background = Color.black
     private let surface = Color(red: 0.025, green: 0.025, blue: 0.025)
@@ -69,6 +82,7 @@ struct ExternalIOSPanelView: View {
         }
         .background(Color.clear.ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .patchStorePresentation(patchStore)
     }
 
     private var header: some View {
@@ -140,8 +154,184 @@ struct ExternalIOSPanelView: View {
         }
     }
 
+    @ViewBuilder
     private var categoryContent: some View {
-        emptyCategory(selectedCategory)
+        if selectedCategory == .skin {
+            if let character = SkinCharacter.all.first(where: { $0.id == selectedSkinCharacterID }) {
+                skinPatchesView(for: character)
+            } else {
+                skinCharacterGrid
+            }
+        } else {
+            emptyCategory(selectedCategory)
+        }
+    }
+
+    private var skinGridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible()), count: SkinCharacter.all.count == 1 ? 1 : 2)
+    }
+
+    private var skinCharacterImageHeight: CGFloat {
+        SkinCharacter.all.count == 1 ? 330 : 210
+    }
+
+    private var skinCharacterGrid: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("SKINS")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .tracking(1.4)
+                        .foregroundStyle(accent)
+                    Text("Selecione um personagem")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+
+                LazyVGrid(columns: skinGridColumns, spacing: 12) {
+                    ForEach(SkinCharacter.all) { character in
+                        Button {
+                            selectedSkinCharacterID = character.id
+                        } label: {
+                            VStack(spacing: 9) {
+                                Image(character.imageName)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: skinCharacterImageHeight)
+                                Text(character.name.lowercased())
+                                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                            }
+                            .padding(10)
+                            .frame(maxWidth: .infinity)
+                            .background(surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(character.name), ver patches de skin")
+                    }
+                }
+            }
+            .padding(18)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    private func skinPatchesView(for character: SkinCharacter) -> some View {
+        let items = skinPatches(for: character)
+
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Button {
+                    selectedSkinCharacterID = nil
+                } label: {
+                    Label("Personagens", systemImage: "chevron.left")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(accent)
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Patches de skin")
+                        .font(.system(size: 21, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text(character.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(accent)
+                }
+
+                if items.isEmpty {
+                    VStack(spacing: 10) {
+                        Image(systemName: "tshirt.fill")
+                            .font(.system(size: 26, weight: .medium))
+                            .foregroundStyle(accent)
+                        Text("Nenhum patch do \(character.name) disponível")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                        Text("Os patches adicionados ao catálogo com o nome \(character.name) aparecerão aqui.")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.white.opacity(0.55))
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(24)
+                    .background(surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(Color.white.opacity(0.07), lineWidth: 1)
+                    }
+                } else {
+                    VStack(spacing: 10) {
+                        ForEach(items) { item in
+                            Button {
+                                if item.isLocked {
+                                    patchStore.requestUnlock(for: item)
+                                } else {
+                                    selectedSkinPatch = item
+                                }
+                            } label: {
+                                skinPatchRow(item, character: character)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            .padding(18)
+        }
+        .scrollIndicators(.hidden)
+        .sheet(item: $selectedSkinPatch) { item in
+            NavigationStack {
+                PatchProjectDetailView(store: patchStore, projectID: item.id)
+            }
+        }
+    }
+
+    private func skinPatches(for character: SkinCharacter) -> [PatchLibraryItem] {
+        patchStore.items.filter { item in
+            let names = [
+                item.project?.name,
+                item.project?.author,
+                item.packageURL.deletingPathExtension().lastPathComponent
+            ].compactMap { $0 }
+            return names.contains { $0.localizedCaseInsensitiveContains(character.id) }
+        }
+    }
+
+    private func skinPatchRow(_ item: PatchLibraryItem, character: SkinCharacter) -> some View {
+        let name = item.project?.name ?? item.packageURL.deletingPathExtension().lastPathComponent
+        return HStack(spacing: 12) {
+            Image(systemName: item.isLocked ? "lock.fill" : "tshirt.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(accent)
+                .frame(width: 42, height: 42)
+                .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(item.isLocked ? "Protegido por senha" : "Patch de skin do \(character.name)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.55))
+            }
+            Spacer(minLength: 4)
+            Image(systemName: item.isLocked ? "lock.fill" : "chevron.right")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Color.white.opacity(0.5))
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.07), lineWidth: 1)
+        }
     }
 
     private func emptyCategory(_ category: ExternalPanelCategory) -> some View {
@@ -231,6 +421,7 @@ struct ExternalIOSPanelView: View {
                     let isSelected = category == selectedCategory
                     Button {
                         selectedCategory = category
+                        selectedSkinCharacterID = nil
                         isDrawerOpen = false
                     } label: {
                         HStack(spacing: 12) {
