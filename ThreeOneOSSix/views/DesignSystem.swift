@@ -134,14 +134,17 @@ private struct ConstellationParticleSeed {
 }
 
 struct ParticleConstellationView: View {
-    private static let seeds: [ConstellationParticleSeed] = (0..<34).map { index in
-        ConstellationParticleSeed(
-            x: CGFloat((index * 37 + 11) % 101) / 100,
-            y: CGFloat((index * 61 + 7) % 103) / 102,
-            phase: CGFloat(index) * 0.83,
-            radius: index.isMultiple(of: 5) ? 1.7 : 1.15
-        )
-    }
+    private static let seeds: [ConstellationParticleSeed] = {
+        var result: [ConstellationParticleSeed] = []
+        for index in 0..<34 {
+            let x = CGFloat((index * 37 + 11) % 101) / 100
+            let y = CGFloat((index * 61 + 7) % 103) / 102
+            let phase = CGFloat(index) * 0.83
+            let radius: CGFloat = index % 5 == 0 ? 1.7 : 1.15
+            result.append(ConstellationParticleSeed(x: x, y: y, phase: phase, radius: radius))
+        }
+        return result
+    }()
 
     private let color = Color(red: 0.67, green: 0.48, blue: 1.0)
 
