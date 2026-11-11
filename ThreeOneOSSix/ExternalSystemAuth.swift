@@ -267,7 +267,7 @@ struct ExternalSystemLoginView: View {
     @State private var isKeyVisible = false
     @FocusState private var keyFieldFocused: Bool
 
-    private let panel = Color(red: 0.075, green: 0.085, blue: 0.105)
+    private let panel = Color(red: 0.13, green: 0.14, blue: 0.16)
 
     private var trimmedKey: String {
         key.trimmingCharacters(in: .whitespacesAndNewlines)

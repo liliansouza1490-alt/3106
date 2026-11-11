@@ -11,11 +11,11 @@ private enum ExternalPanelCategory: String, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
-        case .cache: return "internaldrive.fill"
-        case .avatar: return "person.crop.circle.fill"
+        case .cache: return "externaldrive.fill"
+        case .avatar: return "person.crop.circle"
         case .skin: return "tshirt.fill"
         case .external: return "square.stack.3d.up.fill"
-        case .misc: return "ellipsis.circle.fill"
+        case .misc: return "square.grid.2x2.fill"
         }
     }
 
@@ -32,14 +32,12 @@ private enum ExternalPanelCategory: String, CaseIterable, Identifiable {
 
 struct ExternalIOSPanelView: View {
     @ObservedObject var authSession: ExternalSystemAuthSession
-    @Environment(\.appLanguage) private var language
     @Environment(\.externalGameSelection) private var selectedGame
     @State private var selectedCategory: ExternalPanelCategory = .external
     @State private var isDrawerOpen = false
-    @State private var showSettings = false
 
-    private let background = Color(red: 0.035, green: 0.039, blue: 0.052)
-    private let surface = Color(red: 0.075, green: 0.082, blue: 0.105)
+    private let background = Color(red: 0.09, green: 0.098, blue: 0.118)
+    private let surface = Color(red: 0.15, green: 0.16, blue: 0.18)
     private let accent = Color(red: 0.63, green: 0.43, blue: 0.98)
 
     var body: some View {
@@ -71,11 +69,6 @@ struct ExternalIOSPanelView: View {
         }
         .background(Color.clear.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-                .environment(\.appLanguage, language)
-                .environment(\.locale, language.locale)
-        }
     }
 
     private var header: some View {
@@ -147,17 +140,8 @@ struct ExternalIOSPanelView: View {
         }
     }
 
-    @ViewBuilder
     private var categoryContent: some View {
-        if selectedCategory == .external {
-            PatchProjectsView(
-                onOpenSettings: { showSettings = true },
-                onOpenLogs: {}
-            )
-            .environment(\.appLanguage, language)
-        } else {
-            emptyCategory(selectedCategory)
-        }
+        emptyCategory(selectedCategory)
     }
 
     private func emptyCategory(_ category: ExternalPanelCategory) -> some View {
@@ -182,31 +166,13 @@ struct ExternalIOSPanelView: View {
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.58))
                     Text(category == .misc
-                         ? "Ajustes gerais do app."
+                         ? "Reservado para uma próxima etapa."
                          : "Nenhuma opção configurada nesta categoria.")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.38))
                         .multilineTextAlignment(.center)
                         .padding(.top, 4)
 
-                    if category == .misc {
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Label("Configurações", systemImage: "gearshape.fill")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 13)
-                                .background(accent.opacity(0.20), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                        .stroke(accent.opacity(0.32), lineWidth: 1)
-                                }
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.top, 8)
-                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -267,11 +233,20 @@ struct ExternalIOSPanelView: View {
                         selectedCategory = category
                         isDrawerOpen = false
                     } label: {
-                        HStack(spacing: 13) {
+                        HStack(spacing: 12) {
                             Image(systemName: category.systemImage)
-                                .font(.system(size: 16, weight: .semibold))
+                                .symbolRenderingMode(.hierarchical)
+                                .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(isSelected ? accent : Color.white.opacity(0.56))
-                                .frame(width: 23)
+                                .frame(width: 36, height: 36)
+                                .background(
+                                    isSelected ? accent.opacity(0.18) : Color.white.opacity(0.045),
+                                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                )
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                        .stroke(isSelected ? accent.opacity(0.30) : Color.white.opacity(0.045), lineWidth: 1)
+                                }
                             Text(category.rawValue)
                                 .font(.system(size: 15, weight: isSelected ? .semibold : .medium))
                                 .foregroundStyle(isSelected ? .white : Color.white.opacity(0.72))
@@ -282,8 +257,8 @@ struct ExternalIOSPanelView: View {
                                     .frame(width: 6, height: 6)
                             }
                         }
-                        .padding(.horizontal, 14)
-                        .frame(height: 48)
+                        .padding(.horizontal, 12)
+                        .frame(height: 52)
                         .background(
                             isSelected ? accent.opacity(0.15) : Color.clear,
                             in: RoundedRectangle(cornerRadius: 13, style: .continuous)
@@ -311,7 +286,7 @@ struct ExternalIOSPanelView: View {
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(Color(red: 0.065, green: 0.073, blue: 0.092))
+        .background(Color(red: 0.11, green: 0.12, blue: 0.14))
         .overlay(alignment: .trailing) {
             Rectangle()
                 .fill(Color.white.opacity(0.08))

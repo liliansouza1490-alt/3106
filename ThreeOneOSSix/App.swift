@@ -50,9 +50,9 @@ struct ThreeOneOSSixApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
+                AppTheme.pageBackground
+                    .ignoresSafeArea()
                 if !showCalculatorEntry {
-                    Color(red: 0.035, green: 0.039, blue: 0.052)
-                        .ignoresSafeArea()
                     ParticleConstellationView()
                 }
 

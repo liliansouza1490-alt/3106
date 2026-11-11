@@ -36,7 +36,7 @@ struct GameSelectionView: View {
     @State private var selectedGame: ExternalGame?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let panel = Color(red: 0.075, green: 0.085, blue: 0.105)
+    private let panel = Color(red: 0.13, green: 0.14, blue: 0.16)
 
     var body: some View {
         ZStack {
