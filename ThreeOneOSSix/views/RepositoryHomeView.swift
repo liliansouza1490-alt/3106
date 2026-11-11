@@ -129,15 +129,16 @@ struct RepositoryHomeView: View {
                         }
                     }
                 }
-                .modifier(
-                    AppLiquidGlassSurface(
-                        shape: RoundedRectangle(
-                            cornerRadius: AppTheme.contentCardCornerRadius,
-                            style: .continuous
-                        ),
-                        tint: AppTheme.accent
+                .background(
+                    Color(uiColor: .systemBackground),
+                    in: RoundedRectangle(
+                        cornerRadius: AppTheme.contentCardCornerRadius,
+                        style: .continuous
                     )
                 )
+                .overlay {
+                    AppCardBorder()
+                }
             }
         }
     }
@@ -168,15 +169,16 @@ struct RepositoryHomeView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
         .padding(.vertical, 48)
-        .modifier(
-            AppLiquidGlassSurface(
-                shape: RoundedRectangle(
-                    cornerRadius: AppTheme.contentCardCornerRadius,
-                    style: .continuous
-                ),
-                tint: AppTheme.accent
+        .background(
+            Color(uiColor: .systemBackground),
+            in: RoundedRectangle(
+                cornerRadius: AppTheme.contentCardCornerRadius,
+                style: .continuous
             )
         )
+        .overlay {
+            AppCardBorder()
+        }
     }
 
     private func rebuildFeed() {

@@ -53,6 +53,8 @@ struct ContentView: View {
         }
         .tint(AppTheme.accent)
         .imageScale(.small)
+        .toolbarBackground(Color(uiColor: .systemBackground), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .background(AppTheme.pageBackground.ignoresSafeArea())
         .onChange(of: patchDraftCoordinator.request?.id) { requestID in
             if requestID != nil { tabNavigation.select(AppSection.installed.rawValue) }
@@ -86,7 +88,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(AppTheme.pageBackground.ignoresSafeArea())
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                LiquidGlassTabBar(
+                SimpleBottomBar(
                     sections: featureVisibility.visibleSections,
                     selectedSection: selectedVisibleSection,
                     language: language
@@ -230,14 +232,14 @@ struct ContentView: View {
     }
 }
 
-private struct LiquidGlassTabBar: View {
+private struct SimpleBottomBar: View {
     let sections: [AppSection]
     let selectedSection: AppSection
     let language: AppLanguage
     let onSelect: (AppSection) -> Void
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 0) {
             ForEach(sections) { section in
                 let isSelected = section == selectedSection
                 Button {
@@ -246,38 +248,30 @@ private struct LiquidGlassTabBar: View {
                     VStack(spacing: 4) {
                         Image(systemName: section.systemImage)
                             .font(.system(size: 17, weight: isSelected ? .semibold : .medium))
-                            .symbolRenderingMode(.hierarchical)
                             .frame(height: 19)
                         Text(language.text(section.titleKey))
-                            .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
+                            .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
                             .lineLimit(1)
                             .minimumScaleFactor(0.78)
                     }
                     .foregroundStyle(isSelected ? AppTheme.accent : Color.secondary)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background {
-                        if isSelected {
-                            RoundedRectangle(cornerRadius: 17, style: .continuous)
-                                .fill(AppTheme.accent.opacity(0.13))
-                        }
-                    }
-                    .modifier(
-                        AppLiquidGlassSurface(
-                            shape: RoundedRectangle(cornerRadius: 17, style: .continuous),
-                            tint: AppTheme.accent,
-                            isActive: isSelected
-                        )
-                    )
-                    .contentShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    .frame(height: 48)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .padding(5)
-        .modifier(AppLiquidGlassSurface(shape: Capsule(), tint: AppTheme.accent))
-        .shadow(color: .black.opacity(0.24), radius: 23, x: 0, y: 10)
+        .padding(.horizontal, 12)
+        .padding(.top, 7)
+        .padding(.bottom, 3)
+        .background(Color(uiColor: .systemBackground))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(Color(uiColor: .separator).opacity(0.28))
+                .frame(height: 0.5)
+        }
         .accessibilityElement(children: .contain)
     }
 }

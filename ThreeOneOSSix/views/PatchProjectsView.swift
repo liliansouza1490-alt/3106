@@ -69,7 +69,6 @@ struct PatchProjectsView: View {
                         Section(language.text("patch.title")) {
                             ForEach(filteredItems) { item in
                                 itemRow(item)
-                                    .listRowBackground(installedGlassRow)
                             }
                             .onDelete { offsets in
                                 offsets.map { filteredItems[$0] }.forEach(store.delete)
@@ -87,7 +86,6 @@ struct PatchProjectsView: View {
                                 } label: {
                                     wallpaperRow(package)
                                 }
-                                .listRowBackground(installedGlassRow)
                                 .swipeActions(
                                     edge: .trailing,
                                     allowsFullSwipe: false
@@ -248,14 +246,6 @@ struct PatchProjectsView: View {
             }
         }
         .padding(.vertical, 4)
-    }
-
-    private var installedGlassRow: some View {
-        let shape = RoundedRectangle(cornerRadius: 15, style: .continuous)
-        return shape
-            .fill(Color.clear)
-            .modifier(AppLiquidGlassSurface(shape: shape, tint: AppTheme.accent))
-            .padding(.vertical, 3)
     }
 
     private var wallpaperSymbol: String {

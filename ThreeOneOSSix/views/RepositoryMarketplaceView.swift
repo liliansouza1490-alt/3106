@@ -1008,13 +1008,10 @@ struct AppUtilityToolbar: ToolbarContent {
     var body: some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
             Button(action: onOpenSettings) {
-                Image(systemName: "gearshape.fill")
-                    .font(.system(size: 15, weight: .semibold))
+                Image(systemName: "gearshape")
+                    .font(.system(size: 17, weight: .medium))
                     .foregroundStyle(AppTheme.accent)
                     .frame(width: 36, height: 36)
-                    .background { Circle().fill(AppTheme.accent.opacity(0.12)) }
-                    .modifier(AppLiquidGlassSurface(shape: Circle(), tint: AppTheme.accent))
-                    .shadow(color: .black.opacity(0.16), radius: 10, y: 4)
             }
             .accessibilityLabel(language.text("accessibility.open_settings"))
         }
