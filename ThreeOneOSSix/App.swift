@@ -10,6 +10,7 @@ struct ThreeOneOSSixApp: App {
     @StateObject private var repositoryStore = PackageRepositoryStore()
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
     @State private var showOnboarding = OnboardingStore.shouldShow()
+    @State private var showCalculatorEntry = true
     @State private var showAttribution = false
     @State private var updateOffer: AppUpdateChecker.Offer?
     @Environment(\.scenePhase) private var scenePhase
@@ -45,10 +46,10 @@ struct ThreeOneOSSixApp: App {
                     .environmentObject(repositoryStore)
                     .environment(\.appLanguage, language)
                     .environment(\.locale, language.locale)
-                    .opacity(showOnboarding ? 0 : 1)
-                    .allowsHitTesting(!showOnboarding)
+                    .opacity(showOnboarding || showCalculatorEntry ? 0 : 1)
+                    .allowsHitTesting(!showOnboarding && !showCalculatorEntry)
 
-                if showOnboarding {
+                if showOnboarding && !showCalculatorEntry {
                     OnboardingView {
                         OnboardingStore.markCompleted()
                         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.24)) {
@@ -66,8 +67,21 @@ struct ThreeOneOSSixApp: App {
                     )
                     .zIndex(1)
                 }
+
+                if showCalculatorEntry {
+                    CalculadoraIPhoneView {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.24)) {
+                            showCalculatorEntry = false
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(2)
+                }
             }
-            .displayIdentityAttribution(isPresented: $showAttribution, enabled: !showOnboarding)
+            .displayIdentityAttribution(
+                isPresented: $showAttribution,
+                enabled: !showOnboarding && !showCalculatorEntry
+            )
             .sheet(isPresented: $showAttribution) {
                 DisplayAttributionSheet()
             }
@@ -84,14 +98,19 @@ struct ThreeOneOSSixApp: App {
                 )
             }
             .onAppear {
-                if !showOnboarding {
+                if !showOnboarding && !showCalculatorEntry {
                     appState.detectSupport()
                     checkForUpdate()
                 }
             }
             .onChange(of: scenePhase) { phase in
-                guard phase == .active, !showOnboarding else { return }
+                guard phase == .active, !showOnboarding, !showCalculatorEntry else { return }
                 appState.detectSupport()
+            }
+            .onChange(of: showCalculatorEntry) { isShowing in
+                guard !isShowing, !showOnboarding else { return }
+                appState.detectSupport()
+                checkForUpdate()
             }
             .onOpenURL { url in
                 patchDraftCoordinator.presentImport(url)
