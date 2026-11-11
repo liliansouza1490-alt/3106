@@ -47,12 +47,28 @@ struct AppRowIcon: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(tint.opacity(0.12))
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [tint.opacity(0.20), tint.opacity(0.07)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .strokeBorder(.white.opacity(0.62), lineWidth: 0.8)
+                }
             Image(systemName: systemName)
-                .font(.system(size: symbolSize, weight: .medium))
+                .font(.system(size: symbolSize, weight: .semibold))
+                .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(tint)
         }
         .frame(width: frameSize, height: frameSize)
+        .shadow(color: tint.opacity(0.10), radius: 5, y: 2)
         .accessibilityHidden(true)
     }
 }

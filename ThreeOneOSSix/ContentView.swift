@@ -53,6 +53,9 @@ struct ContentView: View {
         }
         .tint(AppTheme.accent)
         .imageScale(.small)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .background(AppTheme.pageBackground.ignoresSafeArea())
         .onChange(of: patchDraftCoordinator.request?.id) { requestID in
             if requestID != nil { tabNavigation.select(AppSection.installed.rawValue) }
         }
@@ -66,7 +69,8 @@ struct ContentView: View {
             tabNavigation.reconcileSelection(with: featureVisibility)
         }
         .onAppear {
-            if tabBarSelectionRaw == TabBarSelection.legacyDefaultRaw {
+            if tabBarSelectionRaw == TabBarSelection.legacyDefaultRaw
+                || tabBarSelectionRaw == TabBarSelection.previousDefaultRaw {
                 tabBarSelectionRaw = TabBarSelection.defaultRaw
             }
             tabNavigation.reconcileSelection(with: featureVisibility)
@@ -78,18 +82,24 @@ struct ContentView: View {
     }
 
     private var compactLayout: some View {
-        TabView(selection: tabSelection) {
-            ForEach(featureVisibility.visibleSections) { section in
-                sectionContent(section)
-                    .tabItem {
-                        CompactTabLabel(
-                            title: language.text(section.titleKey),
-                            systemImage: section.systemImage
-                        )
+        sectionContent(selectedVisibleSection)
+            .id(selectedVisibleSection.rawValue)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppTheme.pageBackground.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                LiquidGlassTabBar(
+                    sections: featureVisibility.visibleSections,
+                    selectedSection: selectedVisibleSection,
+                    language: language
+                ) { section in
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.84)) {
+                        tabNavigation.select(section.rawValue)
                     }
-                    .tag(section.rawValue)
+                }
+                .padding(.horizontal, 14)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
             }
-        }
     }
 
     private var regularLayout: some View {
@@ -122,6 +132,7 @@ struct ContentView: View {
         } detail: {
             sectionContent(selectedVisibleSection)
                 .id(selectedVisibleSection.rawValue)
+                .background(AppTheme.pageBackground.ignoresSafeArea())
         }
         .navigationSplitViewStyle(.balanced)
     }
@@ -220,22 +231,62 @@ struct ContentView: View {
     }
 }
 
-private struct CompactTabLabel: View {
-    let title: String
-    let systemImage: String
+private struct LiquidGlassTabBar: View {
+    let sections: [AppSection]
+    let selectedSection: AppSection
+    let language: AppLanguage
+    let onSelect: (AppSection) -> Void
 
-    @ViewBuilder
     var body: some View {
-        if let image = UIImage(
-            systemName: systemImage,
-            withConfiguration: UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
-        )?.withRenderingMode(.alwaysTemplate) {
-            Image(uiImage: image)
-        } else {
-            Image(systemName: systemImage)
-                .font(.system(size: 17, weight: .medium))
+        HStack(spacing: 3) {
+            ForEach(sections) { section in
+                let isSelected = section == selectedSection
+                Button {
+                    onSelect(section)
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: section.systemImage)
+                            .font(.system(size: 17, weight: isSelected ? .semibold : .medium))
+                            .symbolRenderingMode(.hierarchical)
+                            .frame(height: 19)
+                        Text(language.text(section.titleKey))
+                            .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.78)
+                    }
+                    .foregroundStyle(isSelected ? AppTheme.accent : Color.secondary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background {
+                        if isSelected {
+                            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                .fill(.ultraThinMaterial)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                        .fill(AppTheme.accent.opacity(0.10))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 17, style: .continuous)
+                                        .strokeBorder(.white.opacity(0.56), lineWidth: 0.8)
+                                }
+                        }
+                    }
+                    .contentShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+            }
         }
-        Text(title)
+        .padding(5)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay {
+            Capsule().strokeBorder(.white.opacity(0.62), lineWidth: 1)
+        }
+        .overlay {
+            Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.6)
+                .padding(1)
+        }
+        .shadow(color: .black.opacity(0.12), radius: 18, x: 0, y: 8)
+        .accessibilityElement(children: .contain)
     }
 }
-

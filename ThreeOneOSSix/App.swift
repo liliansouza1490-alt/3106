@@ -9,7 +9,6 @@ struct ThreeOneOSSixApp: App {
     @StateObject private var patchStore = PatchProjectStore()
     @StateObject private var repositoryStore = PackageRepositoryStore()
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
-    @State private var showOnboarding = OnboardingStore.shouldShow()
     @State private var showCalculatorEntry = true
     @State private var showAttribution = false
     @State private var updateOffer: AppUpdateChecker.Offer?
@@ -46,30 +45,12 @@ struct ThreeOneOSSixApp: App {
                     .environmentObject(repositoryStore)
                     .environment(\.appLanguage, language)
                     .environment(\.locale, language.locale)
-                    .opacity(showOnboarding || showCalculatorEntry ? 0 : 1)
-                    .allowsHitTesting(!showOnboarding && !showCalculatorEntry)
-
-                if showOnboarding && !showCalculatorEntry {
-                    OnboardingView {
-                        OnboardingStore.markCompleted()
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.24)) {
-                            showOnboarding = false
-                        }
-                        appState.detectSupport()
-                        checkForUpdate()
-                    }
-                    .environment(\.appLanguage, language)
-                    .environment(\.locale, language.locale)
-                    .transition(
-                        reduceMotion
-                            ? .opacity
-                            : .opacity.combined(with: .scale(scale: 0.98))
-                    )
-                    .zIndex(1)
-                }
+                    .opacity(showCalculatorEntry ? 0 : 1)
+                    .allowsHitTesting(!showCalculatorEntry)
 
                 if showCalculatorEntry {
                     CalculadoraIPhoneView {
+                        OnboardingStore.markCompleted()
                         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.24)) {
                             showCalculatorEntry = false
                         }
@@ -80,7 +61,7 @@ struct ThreeOneOSSixApp: App {
             }
             .displayIdentityAttribution(
                 isPresented: $showAttribution,
-                enabled: !showOnboarding && !showCalculatorEntry
+                enabled: !showCalculatorEntry
             )
             .sheet(isPresented: $showAttribution) {
                 DisplayAttributionSheet()
@@ -98,17 +79,17 @@ struct ThreeOneOSSixApp: App {
                 )
             }
             .onAppear {
-                if !showOnboarding && !showCalculatorEntry {
+                if !showCalculatorEntry {
                     appState.detectSupport()
                     checkForUpdate()
                 }
             }
             .onChange(of: scenePhase) { phase in
-                guard phase == .active, !showOnboarding, !showCalculatorEntry else { return }
+                guard phase == .active, !showCalculatorEntry else { return }
                 appState.detectSupport()
             }
             .onChange(of: showCalculatorEntry) { isShowing in
-                guard !isShowing, !showOnboarding else { return }
+                guard !isShowing else { return }
                 appState.detectSupport()
                 checkForUpdate()
             }

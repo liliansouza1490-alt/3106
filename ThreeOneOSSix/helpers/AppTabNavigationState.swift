@@ -14,6 +14,14 @@ enum AppSection: Int, CaseIterable, Identifiable {
 }
 
 extension AppSection {
+    static let navigationSections: [AppSection] = [
+        .home, .sources, .installed, .search, .wallpapers
+    ]
+
+    var isNavigationSection: Bool {
+        Self.navigationSections.contains(self)
+    }
+
     var titleKey: String {
         switch self {
         case .home: return "tab.home"
@@ -44,13 +52,14 @@ extension AppSection {
 enum TabBarSelection {
     static let storageKey = "tabbar.selection"
     static let maxSections = 5
-    /// home(0), new(1), installed(3), files(4), cleaner(6)
-    static let defaultRaw = "0,1,3,4,6"
+    /// Home, Sources, Installed, Search, and Wallpapers.
+    static let defaultRaw = "0,2,3,5,7"
     static let legacyDefaultRaw = "0,1,2,3,4"
+    static let previousDefaultRaw = "0,1,3,4,6"
 
     static func sections(from raw: String) -> [AppSection] {
         let selected = Set(raw.split(separator: ",").compactMap { Int($0) })
-        var result = AppSection.allCases.filter { section in
+        var result = AppSection.navigationSections.filter { section in
             section == .home || selected.contains(section.rawValue)
         }
         if result.count > maxSections {
@@ -105,8 +114,8 @@ struct FeatureVisibility: Equatable {
 
     var visibleSections: [AppSection] {
         selectedSections.filter { section in
+            guard section.isNavigationSection else { return false }
             if section == .wallpapers && !wallpapersSupported { return false }
-            if section == .files && !developerModeEnabled { return false }
             return true
         }
     }

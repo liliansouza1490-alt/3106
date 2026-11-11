@@ -4,7 +4,6 @@ import UIKit
 struct LegacyRepositoryExploreView: View {
     @Environment(\.appLanguage) private var language
     @EnvironmentObject private var repositoryStore: PackageRepositoryStore
-    @AppStorage(FeatureVisibility.cleanerStorageKey) private var cleanerEnabled = true
     @State private var activeTool: BuiltInTool?
 
     let wallpapersSupported: Bool
@@ -60,8 +59,6 @@ struct LegacyRepositoryExploreView: View {
             }
             .sheet(item: $activeTool) { tool in
                 switch tool {
-                case .cleaner:
-                    CleanerView()
                 case .wallpaper:
                     WallpaperLabView()
                 }
@@ -73,32 +70,21 @@ struct LegacyRepositoryExploreView: View {
     }
 
     private var builtInToolsSection: some View {
-        Section {
-            if cleanerEnabled {
-                builtInToolButton(
-                    .cleaner,
-                    titleKey: "tab.cleaner",
-                    subtitleKey: "repository.cleaner_subtitle",
-                    systemImage: "sparkles"
-                )
-            }
+        Group {
             if wallpapersSupported {
+                Section {
                 builtInToolButton(
                     .wallpaper,
                     titleKey: "tab.wallpapers",
                     subtitleKey: "repository.wallpaper_subtitle",
                     systemImage: wallpaperSymbol
                 )
+                } header: {
+                    Text(language.text("repository.built_in_tools"))
+                } footer: {
+                    Text(language.text("repository.tools_footer"))
+                }
             }
-            if !cleanerEnabled && !wallpapersSupported {
-                Text(language.text("repository.tools_disabled"))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        } header: {
-            Text(language.text("repository.built_in_tools"))
-        } footer: {
-            Text(language.text("repository.tools_footer"))
         }
     }
 
@@ -1021,21 +1007,16 @@ struct AppUtilityToolbar: ToolbarContent {
 
     var body: some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
-            Menu {
-                Button(action: onOpenSettings) {
-                    Label(
-                        language.text("settings.title"),
-                        systemImage: "gearshape"
-                    )
-                }
-                Button(action: onOpenLogs) {
-                    Label(
-                        language.text("accessibility.open_logs"),
-                        systemImage: "apple.terminal"
-                    )
-                }
-            } label: {
-                Image(systemName: "gearshape")
+            Button(action: onOpenSettings) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .overlay {
+                        Circle().strokeBorder(.white.opacity(0.62), lineWidth: 0.9)
+                    }
+                    .shadow(color: .black.opacity(0.08), radius: 7, y: 3)
             }
             .accessibilityLabel(language.text("accessibility.open_settings"))
         }
@@ -1043,7 +1024,6 @@ struct AppUtilityToolbar: ToolbarContent {
 }
 
 private enum BuiltInTool: String, Identifiable {
-    case cleaner
     case wallpaper
 
     var id: String { rawValue }

@@ -7,8 +7,6 @@ struct SettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
     @AppStorage(TabBarSelection.storageKey)
     private var tabBarSelectionRaw = TabBarSelection.defaultRaw
-    @AppStorage(FeatureVisibility.developerModeStorageKey)
-    private var developerModeEnabled = true
 
     var body: some View {
         NavigationStack {
@@ -38,7 +36,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    ForEach(AppSection.allCases) { section in
+                    ForEach(AppSection.navigationSections) { section in
                         tabBarToggle(for: section)
                     }
                 } header: {
@@ -51,19 +49,6 @@ struct SettingsView: View {
                             Int64(TabBarSelection.maxSections)
                         )
                     )
-                }
-
-                Section {
-                    Toggle(isOn: $developerModeEnabled) {
-                        Label(
-                            language.text("settings.developer_mode"),
-                            systemImage: "hammer.fill"
-                        )
-                    }
-                } header: {
-                    Text(language.text("dashboard.features"))
-                } footer: {
-                    Text(language.text("settings.developer_mode_footer"))
                 }
 
                 if WallpaperFeatureSupportPolicy.isSupported(
@@ -127,6 +112,8 @@ struct SettingsView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.pageBackground.ignoresSafeArea())
             .tint(AppTheme.accent)
             .navigationTitle(language.text("settings.title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -178,8 +165,7 @@ struct SettingsView: View {
 
     private func isTabBarToggleDisabled(_ section: AppSection) -> Bool {
         if selectedSections.contains(section) { return false }
-        guard selectedSections.count >= TabBarSelection.maxSections else { return false }
-        return !(section == .cleaner && selectedSections.contains(.sources))
+        return selectedSections.count >= TabBarSelection.maxSections
     }
 
     private func tabBarBinding(for section: AppSection) -> Binding<Bool> {
@@ -189,13 +175,7 @@ struct SettingsView: View {
                 var sections = selectedSections
                 if isOn {
                     guard !sections.contains(section) else { return }
-                    if sections.count >= TabBarSelection.maxSections {
-                        guard section == .cleaner,
-                              let sourcesIndex = sections.firstIndex(of: .sources) else {
-                            return
-                        }
-                        sections.remove(at: sourcesIndex)
-                    }
+                    guard sections.count < TabBarSelection.maxSections else { return }
                     sections.append(section)
                 } else {
                     guard section != .home else { return }
