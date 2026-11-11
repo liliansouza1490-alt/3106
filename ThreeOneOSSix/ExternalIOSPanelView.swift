@@ -168,16 +168,12 @@ struct ExternalIOSPanelView: View {
     }
 
     private var skinGridColumns: [GridItem] {
-        Array(repeating: GridItem(.flexible()), count: SkinCharacter.all.count == 1 ? 1 : 2)
-    }
-
-    private var skinCharacterImageHeight: CGFloat {
-        SkinCharacter.all.count == 1 ? 330 : 210
+        [GridItem(.adaptive(minimum: 132, maximum: 180), spacing: 12, alignment: .top)]
     }
 
     private var skinCharacterGrid: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("SKINS")
                         .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -188,37 +184,50 @@ struct ExternalIOSPanelView: View {
                         .foregroundStyle(.white)
                 }
 
-                LazyVGrid(columns: skinGridColumns, spacing: 12) {
-                    ForEach(SkinCharacter.all) { character in
-                        Button {
-                            selectedSkinCharacterID = character.id
-                        } label: {
-                            VStack(spacing: 9) {
-                                Image(character.imageName)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: skinCharacterImageHeight)
-                                Text(character.name.lowercased())
-                                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
-                            }
-                            .padding(10)
-                            .frame(maxWidth: .infinity)
-                            .background(surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                            }
+                if SkinCharacter.all.count == 1, let character = SkinCharacter.all.first {
+                    HStack {
+                        Spacer(minLength: 0)
+                        skinCharacterCard(character)
+                            .frame(maxWidth: 180)
+                        Spacer(minLength: 0)
+                    }
+                } else {
+                    LazyVGrid(columns: skinGridColumns, spacing: 12) {
+                        ForEach(SkinCharacter.all) { character in
+                            skinCharacterCard(character)
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("\(character.name), ver patches de skin")
                     }
                 }
             }
             .padding(18)
         }
         .scrollIndicators(.hidden)
+    }
+
+    private func skinCharacterCard(_ character: SkinCharacter) -> some View {
+        Button {
+            selectedSkinCharacterID = character.id
+        } label: {
+            VStack(spacing: 7) {
+                Image(character.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 138)
+                Text(character.name.lowercased())
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .background(surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(character.name), ver patches de skin")
     }
 
     private func skinPatchesView(for character: SkinCharacter) -> some View {
