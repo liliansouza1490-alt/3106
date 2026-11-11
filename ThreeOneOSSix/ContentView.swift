@@ -3,6 +3,7 @@ import UIKit
 
 struct ContentView: View {
     @Environment(\.appLanguage) private var language
+    @Environment(\.externalGameSelection) private var selectedGame
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var patchDraftCoordinator: PatchDraftCoordinator
     @EnvironmentObject private var patchStore: PatchProjectStore
@@ -128,7 +129,7 @@ struct ContentView: View {
                     )
                 }
             }
-            .navigationTitle("3106")
+            .navigationTitle(selectedGame.title)
             .navigationSplitViewColumnWidth(min: 210, ideal: 240, max: 300)
         } detail: {
             sectionContent(selectedVisibleSection)

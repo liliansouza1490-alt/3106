@@ -12,6 +12,7 @@ struct ThreeOneOSSixApp: App {
     @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
     @State private var showCalculatorEntry = true
     @State private var hasInitializedAuthorizedApp = false
+    @State private var selectedGame: ExternalGame?
     @State private var showAttribution = false
     @State private var updateOffer: AppUpdateChecker.Offer?
     @Environment(\.scenePhase) private var scenePhase
@@ -39,6 +40,7 @@ struct ThreeOneOSSixApp: App {
     private func initializeAuthorizedAppIfNeeded() {
         guard !showCalculatorEntry,
               externalAuthSession.isAuthenticated,
+              selectedGame != nil,
               !hasInitializedAuthorizedApp else { return }
         hasInitializedAuthorizedApp = true
         appState.detectSupport()
@@ -58,7 +60,12 @@ struct ThreeOneOSSixApp: App {
                     }
                     .transition(.opacity)
                     .zIndex(2)
-                } else if externalAuthSession.isAuthenticated {
+                } else if !externalAuthSession.isAuthenticated {
+                    ExternalSystemLoginView(session: externalAuthSession)
+                        .environment(\.appLanguage, language)
+                        .environment(\.locale, language.locale)
+                        .transition(.opacity)
+                } else if let selectedGame {
                     ContentView()
                         .environmentObject(appState)
                         .environmentObject(patchDraftCoordinator)
@@ -67,9 +74,14 @@ struct ThreeOneOSSixApp: App {
                         .environmentObject(repositoryStore)
                         .environment(\.appLanguage, language)
                         .environment(\.locale, language.locale)
+                        .environment(\.externalGameSelection, selectedGame)
                         .transition(.opacity)
                 } else {
-                    ExternalSystemLoginView(session: externalAuthSession)
+                    GameSelectionView { game in
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.22)) {
+                            selectedGame = game
+                        }
+                    }
                         .environment(\.appLanguage, language)
                         .environment(\.locale, language.locale)
                         .transition(.opacity)
@@ -79,7 +91,7 @@ struct ThreeOneOSSixApp: App {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.22), value: externalAuthSession.isAuthenticated)
             .displayIdentityAttribution(
                 isPresented: $showAttribution,
-                enabled: !showCalculatorEntry && externalAuthSession.isAuthenticated
+                enabled: !showCalculatorEntry && externalAuthSession.isAuthenticated && selectedGame != nil
             )
             .sheet(isPresented: $showAttribution) {
                 DisplayAttributionSheet()
@@ -102,7 +114,7 @@ struct ThreeOneOSSixApp: App {
             .onChange(of: scenePhase) { phase in
                 guard phase == .active, !showCalculatorEntry else { return }
                 Task { await externalAuthSession.refreshStoredSession() }
-                if externalAuthSession.isAuthenticated { appState.detectSupport() }
+                if externalAuthSession.isAuthenticated, selectedGame != nil { appState.detectSupport() }
             }
             .onChange(of: showCalculatorEntry) { isShowing in
                 if !isShowing { initializeAuthorizedAppIfNeeded() }
@@ -111,8 +123,12 @@ struct ThreeOneOSSixApp: App {
                 if isAuthenticated {
                     initializeAuthorizedAppIfNeeded()
                 } else {
+                    selectedGame = nil
                     hasInitializedAuthorizedApp = false
                 }
+            }
+            .onChange(of: selectedGame) { game in
+                if game != nil { initializeAuthorizedAppIfNeeded() }
             }
             .onOpenURL { url in
                 patchDraftCoordinator.presentImport(url)

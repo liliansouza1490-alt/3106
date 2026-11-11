@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RepositoryHomeView: View {
     @Environment(\.appLanguage) private var language
+    @Environment(\.externalGameSelection) private var selectedGame
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var store: PackageRepositoryStore
     @State private var feed: [RepositoryPackageRecord] = []
@@ -32,7 +33,7 @@ struct RepositoryHomeView: View {
                 await store.refreshAllAndWait()
                 rebuildFeed()
             }
-            .navigationTitle("3106")
+            .navigationTitle(selectedGame.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 AppUtilityToolbar(
