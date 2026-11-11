@@ -36,7 +36,7 @@ struct GameSelectionView: View {
     @State private var selectedGame: ExternalGame?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let panel = Color(red: 0.13, green: 0.14, blue: 0.16)
+    private let panel = Color.black
 
     var body: some View {
         ZStack {
@@ -48,7 +48,7 @@ struct GameSelectionView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(AppTheme.accent)
                         .frame(width: 38, height: 38)
-                        .background(AppTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 11))
+                        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 11))
 
                     Text("EXTERNAL SYSTEM")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -83,10 +83,14 @@ struct GameSelectionView: View {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 13, weight: .bold))
                     }
-                    .foregroundStyle(Color.black)
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
-                    .background(AppTheme.accent, in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color(red: 0.025, green: 0.025, blue: 0.025), in: RoundedRectangle(cornerRadius: 14))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                    }
                 }
                 .buttonStyle(.plain)
                 .disabled(selectedGame == nil)
@@ -142,7 +146,7 @@ struct GameSelectionView: View {
             }
             .padding(15)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? AppTheme.accent.opacity(0.10) : panel, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+            .background(panel, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 19, style: .continuous)
                     .stroke(isSelected ? AppTheme.accent.opacity(0.85) : Color.white.opacity(0.075), lineWidth: isSelected ? 1.5 : 1)

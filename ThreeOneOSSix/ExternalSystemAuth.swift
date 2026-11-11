@@ -267,7 +267,7 @@ struct ExternalSystemLoginView: View {
     @State private var isKeyVisible = false
     @FocusState private var keyFieldFocused: Bool
 
-    private let panel = Color(red: 0.13, green: 0.14, blue: 0.16)
+    private let panel = Color.black
 
     private var trimmedKey: String {
         key.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -286,7 +286,7 @@ struct ExternalSystemLoginView: View {
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(AppTheme.accent)
                             .frame(width: 40, height: 40)
-                            .background(AppTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                            .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 12))
 
                         Text("EXTERNAL SYSTEM")
                             .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -362,7 +362,7 @@ struct ExternalSystemLoginView: View {
                         Button(action: submit) {
                             HStack(spacing: 9) {
                                 if session.isChecking {
-                                    ProgressView().tint(Color.black)
+                                    ProgressView().tint(.white)
                                 }
                                 Text(session.isChecking ? "Validando key…" : "Validar chave")
                                     .font(.system(size: 15, weight: .bold))
@@ -371,10 +371,14 @@ struct ExternalSystemLoginView: View {
                                         .font(.system(size: 13, weight: .bold))
                                 }
                             }
-                            .foregroundStyle(Color.black)
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 52)
-                            .background(AppTheme.accent, in: RoundedRectangle(cornerRadius: 13))
+                            .background(Color(red: 0.025, green: 0.025, blue: 0.025), in: RoundedRectangle(cornerRadius: 13))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 13)
+                                    .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                            }
                         }
                         .buttonStyle(.plain)
                         .disabled(trimmedKey.isEmpty || session.isChecking)

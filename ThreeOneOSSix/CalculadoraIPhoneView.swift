@@ -25,7 +25,7 @@ struct CalculadoraIPhoneView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            AppTheme.pageBackground.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
 
             GeometryReader { geometry in
                 VStack(spacing: 0) {

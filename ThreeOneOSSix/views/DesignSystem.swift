@@ -8,8 +8,8 @@ enum AppTheme {
                 : UIColor(red: 0.85, green: 0.42, blue: 0.20, alpha: 1.00)
         }
     )
-    static let pageBackground = Color(red: 0.075, green: 0.082, blue: 0.098)
-    static let consoleBackground = Color(red: 0.13, green: 0.14, blue: 0.16)
+    static let pageBackground = Color.black
+    static let consoleBackground = Color(red: 0.025, green: 0.025, blue: 0.025)
     static let pageInset: CGFloat = 16
     static let rowIconSize: CGFloat = 17
     static let rowIconFrame: CGFloat = 28

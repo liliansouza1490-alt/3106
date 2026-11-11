@@ -36,8 +36,8 @@ struct ExternalIOSPanelView: View {
     @State private var selectedCategory: ExternalPanelCategory = .external
     @State private var isDrawerOpen = false
 
-    private let background = Color(red: 0.09, green: 0.098, blue: 0.118)
-    private let surface = Color(red: 0.15, green: 0.16, blue: 0.18)
+    private let background = Color.black
+    private let surface = Color(red: 0.025, green: 0.025, blue: 0.025)
     private let accent = Color(red: 0.63, green: 0.43, blue: 0.98)
 
     var body: some View {
@@ -151,7 +151,7 @@ struct ExternalIOSPanelView: View {
                     .font(.system(size: 29, weight: .medium))
                     .foregroundStyle(accent)
                     .frame(width: 72, height: 72)
-                    .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .stroke(accent.opacity(0.28), lineWidth: 1)
@@ -240,12 +240,12 @@ struct ExternalIOSPanelView: View {
                                 .foregroundStyle(isSelected ? accent : Color.white.opacity(0.56))
                                 .frame(width: 36, height: 36)
                                 .background(
-                                    isSelected ? accent.opacity(0.18) : Color.white.opacity(0.045),
+                                    isSelected ? Color.white.opacity(0.07) : Color.white.opacity(0.025),
                                     in: RoundedRectangle(cornerRadius: 11, style: .continuous)
                                 )
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                        .stroke(isSelected ? accent.opacity(0.30) : Color.white.opacity(0.045), lineWidth: 1)
+                                        .stroke(isSelected ? accent.opacity(0.32) : Color.white.opacity(0.035), lineWidth: 1)
                                 }
                             Text(category.rawValue)
                                 .font(.system(size: 15, weight: isSelected ? .semibold : .medium))
@@ -260,12 +260,12 @@ struct ExternalIOSPanelView: View {
                         .padding(.horizontal, 12)
                         .frame(height: 52)
                         .background(
-                            isSelected ? accent.opacity(0.15) : Color.clear,
+                            isSelected ? Color.white.opacity(0.045) : Color.clear,
                             in: RoundedRectangle(cornerRadius: 13, style: .continuous)
                         )
                         .overlay {
                             RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .stroke(isSelected ? accent.opacity(0.35) : Color.clear, lineWidth: 1)
+                                .stroke(isSelected ? Color.white.opacity(0.12) : Color.clear, lineWidth: 1)
                         }
                         .contentShape(Rectangle())
                     }
@@ -286,7 +286,7 @@ struct ExternalIOSPanelView: View {
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(Color(red: 0.11, green: 0.12, blue: 0.14))
+        .background(Color.black)
         .overlay(alignment: .trailing) {
             Rectangle()
                 .fill(Color.white.opacity(0.08))
