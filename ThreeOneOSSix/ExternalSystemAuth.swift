@@ -109,9 +109,7 @@ final class ExternalSystemAuthSession: ObservableObject {
             var components = URLComponents(url: Self.endpoint, resolvingAgainstBaseURL: false)!
             let input: [String: Any] = ["json": ["key": key, "deviceId": deviceID]]
             let inputData = try JSONSerialization.data(withJSONObject: input)
-            guard let inputString = String(data: inputData, encoding: .utf8) else {
-                throw URLError(.cannotEncodeContentData)
-            }
+            let inputString = String(decoding: inputData, as: UTF8.self)
             components.queryItems = [URLQueryItem(name: "input", value: inputString)]
             guard let url = components.url else { throw URLError(.badURL) }
 
