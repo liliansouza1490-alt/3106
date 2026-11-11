@@ -106,7 +106,7 @@ struct PatchProjectsView: View {
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(AppTheme.pageBackground.ignoresSafeArea())
+            .background(Color.clear.ignoresSafeArea())
             .navigationTitle(language.text("tab.installed"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -683,12 +683,25 @@ private struct PatchProjectDetailView: View {
                 }
 
                 Section {
-                    Button {
-                        showApplyConfirmation = true
-                    } label: {
-                        actionLabel("patch.apply", systemImage: "checkmark.shield.fill")
+                    Toggle(isOn: patchToggleBinding) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label(
+                                language.text(receipt == nil ? "patch.apply" : "patch.restore"),
+                                systemImage: receipt == nil ? "checkmark.shield.fill" : "arrow.uturn.backward.circle"
+                            )
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                            Text(language.text(
+                                receipt == nil ? "patch.apply_footer" : "patch.restore_confirm_message"
+                            ))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
-                    .disabled(isWorking || receipt != nil)
+                    .tint(Color(red: 0.63, green: 0.43, blue: 0.98))
+                    .disabled(isWorking || item == nil)
 
                     if receipt != nil {
                         Button {
@@ -697,21 +710,12 @@ private struct PatchProjectDetailView: View {
                             actionLabel("patch.reset", systemImage: "arrow.counterclockwise.circle")
                         }
                         .disabled(isWorking)
-
-                        Button(role: .destructive) {
-                            showRestoreConfirmation = true
-                        } label: {
-                            actionLabel("patch.restore", systemImage: "arrow.uturn.backward.circle")
-                        }
-                        .disabled(isWorking)
                     }
 
                     Button(action: prepareExport) {
                         actionLabel("patch.export", systemImage: "square.and.arrow.up")
                     }
                     .disabled(isWorking)
-                } footer: {
-                    Text(language.text("patch.apply_footer"))
                 }
             }
         }
@@ -801,6 +805,20 @@ private struct PatchProjectDetailView: View {
     private func actionLabel(_ key: String, systemImage: String) -> some View {
         Label(language.text(key), systemImage: systemImage)
             .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var patchToggleBinding: Binding<Bool> {
+        Binding(
+            get: { receipt != nil },
+            set: { shouldApply in
+                guard !isWorking else { return }
+                if shouldApply {
+                    showApplyConfirmation = true
+                } else {
+                    showRestoreConfirmation = true
+                }
+            }
+        )
     }
 
     private func patchInfoRow(

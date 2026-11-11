@@ -166,6 +166,17 @@ final class ExternalSystemAuthSession: ObservableObject {
         }
     }
 
+    func requestNewKey() {
+        guard !isChecking else { return }
+        expiryTask?.cancel()
+        expiryTask = nil
+        storedKey = nil
+        expiresAt = nil
+        errorMessage = nil
+        isAuthenticated = false
+        Self.deleteKeychain(service: Self.keychainService, account: Self.keychainAccount)
+    }
+
     private func invalidate(message: String) {
         expiryTask?.cancel()
         expiryTask = nil
@@ -256,7 +267,6 @@ struct ExternalSystemLoginView: View {
     @State private var isKeyVisible = false
     @FocusState private var keyFieldFocused: Bool
 
-    private let background = Color(red: 0.035, green: 0.043, blue: 0.055)
     private let panel = Color(red: 0.075, green: 0.085, blue: 0.105)
 
     private var trimmedKey: String {
@@ -265,7 +275,7 @@ struct ExternalSystemLoginView: View {
 
     var body: some View {
         ZStack {
-            background.ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {

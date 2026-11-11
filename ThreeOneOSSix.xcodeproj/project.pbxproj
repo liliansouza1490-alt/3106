@@ -11,6 +11,7 @@
 		3105A201 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A021; };
 		A11F2E01A0B14A11B5C2D001 /* ExternalSystemAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11F2E01A0B14A11B5C2D002; };
 		F2C13E6A0A7C4C33B17A0001 /* GameSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C13E6A0A7C4C33B17A0002; };
+		E19F5A52B39D4A759729E001 /* ExternalIOSPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19F5A52B39D4A759729E002; };
 		3106Z200 /* CalculadoraIPhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3106Z100; };
 		3105A203 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A023; };
 		3105A204 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105A024; };
@@ -89,6 +90,7 @@
 		3105A021 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A11F2E01A0B14A11B5C2D002 /* ExternalSystemAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalSystemAuth.swift; sourceTree = "<group>"; };
 		F2C13E6A0A7C4C33B17A0002 /* GameSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSelectionView.swift; sourceTree = "<group>"; };
+		E19F5A52B39D4A759729E002 /* ExternalIOSPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalIOSPanelView.swift; sourceTree = "<group>"; };
 		3106Z100 /* CalculadoraIPhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculadoraIPhoneView.swift; sourceTree = "<group>"; };
 		3105A023 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3105A024 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				3105A021 /* ContentView.swift */,
 				A11F2E01A0B14A11B5C2D002 /* ExternalSystemAuth.swift */,
 				F2C13E6A0A7C4C33B17A0002 /* GameSelectionView.swift */,
+				E19F5A52B39D4A759729E002 /* ExternalIOSPanelView.swift */,
 				3106Z100 /* CalculadoraIPhoneView.swift */,
 				3105A403 /* exploit */,
 				3105A404 /* views */,
@@ -407,6 +410,7 @@
 				3105A200, 3105A201, 3105A203, 3105A204,
 				A11F2E01A0B14A11B5C2D001,
 				F2C13E6A0A7C4C33B17A0001,
+				E19F5A52B39D4A759729E001,
 				3106Z200,
 				3105A205, 3105A206, 3105A207, 3105A209,
 				3106W200,

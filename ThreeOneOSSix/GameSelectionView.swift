@@ -36,12 +36,11 @@ struct GameSelectionView: View {
     @State private var selectedGame: ExternalGame?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let background = Color(red: 0.035, green: 0.043, blue: 0.055)
     private let panel = Color(red: 0.075, green: 0.085, blue: 0.105)
 
     var body: some View {
         ZStack {
-            background.ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 10) {

@@ -124,3 +124,69 @@ struct AppLogo: View {
         .accessibilityHidden(true)
     }
 }
+
+
+private struct ConstellationParticleSeed {
+    let x: CGFloat
+    let y: CGFloat
+    let phase: CGFloat
+    let radius: CGFloat
+}
+
+struct ParticleConstellationView: View {
+    private static let seeds: [ConstellationParticleSeed] = (0..<34).map { index in
+        ConstellationParticleSeed(
+            x: CGFloat((index * 37 + 11) % 101) / 100,
+            y: CGFloat((index * 61 + 7) % 103) / 102,
+            phase: CGFloat(index) * 0.83,
+            radius: index.isMultiple(of: 5) ? 1.7 : 1.15
+        )
+    }
+
+    private let color = Color(red: 0.67, green: 0.48, blue: 1.0)
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 24.0, paused: false)) { timeline in
+            Canvas { context, size in
+                guard size.width > 0, size.height > 0 else { return }
+                let time = timeline.date.timeIntervalSinceReferenceDate
+                let points = Self.seeds.map { seed in
+                    CGPoint(
+                        x: CGFloat(min(max(Double(seed.x) + sin(time * 0.16 + Double(seed.phase)) * 0.025, 0.01), 0.99)) * size.width,
+                        y: CGFloat(min(max(Double(seed.y) + cos(time * 0.13 + Double(seed.phase)) * 0.032, 0.01), 0.99)) * size.height
+                    )
+                }
+                let maximumDistance = Double(min(max(size.width * 0.30, 78), 132))
+
+                for first in points.indices {
+                    for second in (first + 1)..<points.count {
+                        let dx = Double(points[first].x - points[second].x)
+                        let dy = Double(points[first].y - points[second].y)
+                        let distance = sqrt(dx * dx + dy * dy)
+                        guard distance < maximumDistance else { continue }
+
+                        var line = Path()
+                        line.move(to: points[first])
+                        line.addLine(to: points[second])
+                        let opacity = 0.13 * (1 - distance / maximumDistance)
+                        context.stroke(line, with: .color(color.opacity(opacity)), lineWidth: 0.55)
+                    }
+                }
+
+                for (index, point) in points.enumerated() {
+                    let radius = Self.seeds[index].radius
+                    let glow = CGRect(x: point.x - radius * 2.5, y: point.y - radius * 2.5,
+                                      width: radius * 5, height: radius * 5)
+                    let core = CGRect(x: point.x - radius, y: point.y - radius,
+                                      width: radius * 2, height: radius * 2)
+                    context.fill(Path(ellipseIn: glow), with: .color(color.opacity(0.09)))
+                    context.fill(Path(ellipseIn: core), with: .color(color.opacity(0.48)))
+                }
+            }
+        }
+        .blendMode(.screen)
+        .opacity(0.78)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}

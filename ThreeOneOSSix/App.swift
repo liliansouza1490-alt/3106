@@ -50,6 +50,12 @@ struct ThreeOneOSSixApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
+                if !showCalculatorEntry {
+                    Color(red: 0.035, green: 0.039, blue: 0.052)
+                        .ignoresSafeArea()
+                    ParticleConstellationView()
+                }
+
                 if showCalculatorEntry {
                     CalculadoraIPhoneView {
                         OnboardingStore.markCompleted()
@@ -66,7 +72,7 @@ struct ThreeOneOSSixApp: App {
                         .environment(\.locale, language.locale)
                         .transition(.opacity)
                 } else if let selectedGame {
-                    ContentView()
+                    ExternalIOSPanelView(authSession: externalAuthSession)
                         .environmentObject(appState)
                         .environmentObject(patchDraftCoordinator)
                         .environmentObject(fileOperationCoordinator)
